@@ -48,5 +48,3 @@ roslaunch kinfu_semantic kinect_fusion_rviz.launch
 ```
 rosbag play {$bagname}.bag
 
-
-## README still in progress.....
