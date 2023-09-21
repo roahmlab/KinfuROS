@@ -1,0 +1,7 @@
+<launch>
+  <!-- Start KinectFusionNode -->
+  <node pkg="kinfu_semantic" type="my_kinfu_node" name="kinect_fusion_node" output="screen" />
+
+  <!-- Start rviz -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d /home/anranli/catkin_ws/src/kinfu_semantic/rviz/kinfu.rviz" output="screen"/>
+</launch>
