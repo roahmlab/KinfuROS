@@ -33,7 +33,17 @@ catkin build
 ```
 source devel/setup.bash
 ```
-
+## Building the seg_preproc
+1. Download the Depenedencies for k4a
+   ```
+   https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/libk4a1.4/libk4a1.4_1.4.1_amd64.deb
+   https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/libk4a1.4-dev/libk4a1.4-dev_1.4.1_amd64.deb
+   optionally: https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/k/k4a-tools/k4a-tools_1.4.1_amd64.deb
+   ```
+2. Download Tensor RT from Nvidia's website (Version 8.6.1 GA), assuming CUDA has already been installed
+   ```
+   https://developer.nvidia.com/nvidia-tensorrt-8x-download 
+   ```
 ## Usage
 Before running the package, make sure you build the package successfully and source the workspace.
 1. Run the preproc package (
