@@ -119,9 +119,9 @@ def main():
         '~resolution': (1280, 720),
         '~segformer_trt_file': rospkg_path + '/resources/trt_engine_8.6.1.trt',
         '~segformer_taxonomy': rospkg_path + '/resources/taxonomy.json',
-        '~refinement_enabled': True,
+        '~refinement_enabled': False,
         '~fastsam_pt_file': rospkg_path + '/resources/FastSAM-s.pt',
-        '~blur_filter_enabled': True,
+        '~blur_filter_enabled': False,
         '~blur_threshold': 20
     }
     params = {param.strip('~'): rospy.get_param(param, default) for param, default in default_params.items()}

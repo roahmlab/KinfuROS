@@ -276,6 +276,7 @@ void KinFuImpl<T>::render(OutputArray image, const Matx44f& _cameraPose) const
     if((cameraPose.rotation() == pose.rotation() && cameraPose.translation() == pose.translation()) ||
        (cameraPose.rotation() == id.rotation()   && cameraPose.translation() == id.translation()))
     {
+        printf("That happened");
         renderPointsNormals(pyrPoints[0], pyrNormals[0], pyrClasses[0], image, params.lightPose);
     }
     else

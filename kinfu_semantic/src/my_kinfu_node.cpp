@@ -25,6 +25,7 @@ private:
     message_filters::Subscriber<sensor_msgs::Image> depth_sub_;
     message_filters::Subscriber<sensor_msgs::Image> semantic_sub_;
     ros::Publisher visualization_pub_;
+    image_transport::Publisher pub;
     Ptr<kinfuroahm::Params> params;
     Ptr<kinfuroahm::KinFu> kf;
 
@@ -37,7 +38,10 @@ public:
     sync(sync_policy(30), depth_sub_, semantic_sub_) {
         //depth_sub_.subscribe(nh_, "/preproc/depth", 1);
         //semantic_sub_.subscribe(nh_, "/preproc/segmentation", 1);
-        visualization_pub_ = nh_.advertise<sensor_msgs::Image>("kinect_fusion_visualization", 1); 
+        // ros::NodeHandle nh_;
+        image_transport::ImageTransport it(nh_);
+        pub = it.advertise("kinect_fusion_visualization", 1);
+        // visualization_pub_ = nh_.advertise<sensor_msgs::ImagePtr>("kinect_fusion_visualization", 1); 
         //typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_policy;
         //message_filters::Synchronizer<sync_policy> sync(sync_policy(30), depth_sub_, semantic_sub_);
         sync.registerCallback(boost::bind(&KinectFusionNode::callback, this, _1, _2));
@@ -56,7 +60,7 @@ public:
         cv_bridge::CvImagePtr depth_cv_ptr, semantic_cv_ptr;
         try {
             depth_cv_ptr = cv_bridge::toCvCopy(depth_msg, sensor_msgs::image_encodings::TYPE_32FC1);
-            semantic_cv_ptr = cv_bridge::toCvCopy(semantic_msg, sensor_msgs::image_encodings::MONO8);
+            semantic_cv_ptr = cv_bridge::toCvCopy(semantic_msg, sensor_msgs::image_encodings::TYPE_8UC1);
         } catch (cv_bridge::Exception& e) {
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
@@ -67,26 +71,34 @@ public:
         cv::Mat semantic = semantic_cv_ptr->image.clone();
 
         if (!depth.empty() && !semantic.empty()) {
-        // Update KinectFusion using kf_ object
-        if (!kf->update(depth, semantic)) {
-            printf("Reset KinectFusion\n");
-            kf->reset();
-        }
-        // Retrieve rendered TSDF
-        UMat tsdfRender;
-        kf->render(tsdfRender);
+            // Update KinectFusion using kf_ object
+            if (!kf->update(depth, semantic)) {
+                printf("Reset KinectFusion\n");
+                kf->reset();
+            }
+            // Retrieve rendered TSDF
+            UMat tsdfRender;
+            kf->render(tsdfRender);
 
-        UMat points;
-        UMat normals;
+            UMat points;
+            UMat normals;
 
-        // Convert the UMat to a cv::Mat
-        cv::Mat tsdfRenderMat;
-        tsdfRender.copyTo(tsdfRenderMat);
+            // Convert the UMat to a cv::Mat
+            cv::Mat tsdfRenderMat;
+            tsdfRender.copyTo(tsdfRenderMat);
 
-        // Create the sensor_msgs::Image message
-        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", tsdfRenderMat).toImageMsg();
-        visualization_pub_.publish(msg);
 
+            // printf("%d\n", tsdfRenderMat.channels());
+            // cv::Size s = tsdfRender.size();
+            // int rows = s.height;
+            // int cols = s.width;
+            // printf("%d", rows);
+            // printf("%d", cols);
+
+            // Create the sensor_msgs::Image message
+            // sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", tsdfRenderMat).toImageMsg();
+            sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "rgba8", tsdfRenderMat).toImageMsg();
+            pub.publish(msg);
         }
     }
 };
