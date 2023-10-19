@@ -486,26 +486,26 @@ struct IntegrateInvoker : ParallelLoopBody
 
 
                         //update semantic vector
-                        voxel.semantic_weights[m]+=1;
+                        //voxel.semantic_weights[m]+=1;
 
-                        // if(m >= 0 && m < 10){
-                        //     voxel.semantic_weights[0]+=1;
-                        // }                  
-                        // if(m >= 10 && m < 20){
-                        //     voxel.semantic_weights[1]+=1;
-                        // } 
-                        // if(m >= 20 && m < 30){
-                        //     voxel.semantic_weights[2]+=1;
-                        // } 
-                        // if(m >= 30 && m < 40){
-                        //     voxel.semantic_weights[3]+=1;
-                        // } 
-                        // if(m >= 40 && m < 50){
-                        //     voxel.semantic_weights[4]+=1;
-                        // }
-                        // if(m >= 50 && m < 57){
-                        //     voxel.semantic_weights[5]+=1;
-                        // }  
+                        if(m >= 0 && m < 10){
+                            voxel.semantic_weights[0]+=1;
+                        }                  
+                        if(m >= 10 && m < 20){
+                            voxel.semantic_weights[1]+=1;
+                        } 
+                        if(m >= 20 && m < 30){
+                            voxel.semantic_weights[2]+=1;
+                        } 
+                        if(m >= 30 && m < 40){
+                            voxel.semantic_weights[3]+=1;
+                        } 
+                        if(m >= 40 && m < 50){
+                            voxel.semantic_weights[4]+=1;
+                        }
+                        if(m >= 50 && m < 57){
+                            voxel.semantic_weights[5]+=1;
+                        }  
                         
                         // for (int y = 0; y < volume.maxIndexMat.rows; y++) {
                         //     for (int x = 0; x < volume.maxIndexMat.cols; x++) {

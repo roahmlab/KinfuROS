@@ -91,6 +91,13 @@ execute_process(
   COMMAND make -C ${OPENCV_BUILD_DIR} install
 )
 
+# Make it so that we can build during the build state too
+add_custom_target(kinfu_cv ALL DEPENDS rgbdroahm)
+add_custom_command(
+  OUTPUT rgbdroahm
+  COMMAND make -C ${OPENCV_BUILD_DIR} -j8
+  COMMAND make -C ${OPENCV_BUILD_DIR} install
+)
 
 # Use findpackage to get stuff
 find_package(OpenCV PATHS ${OPENCV_INSTALL_PREFIX} NO_DEFAULT_PATH)
