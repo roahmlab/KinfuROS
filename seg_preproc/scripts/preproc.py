@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-
 import sys
 import os
 from typing import Optional
 import cv2
 import torch
+import json
+import numpy as np
 
 # ROS dependencies
 import rospy
@@ -17,8 +18,9 @@ from sensor_msgs.msg import Image, CameraInfo
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.segformer_trt import SegFormerTRT
+from utils import SegFormerTRT
 from src.FastSAM.fastsam import FastSAM
+from utils.utils import concatenating_map
 
 
 class Preproc:
@@ -29,7 +31,8 @@ class Preproc:
                  refinement_enabled: Optional[bool] = False,
                  blur_filter_enabled: Optional[bool] = False,
                  blur_threshold: Optional[int] = 20,
-                 resolution: Optional[tuple] = (1280, 720)
+                 resolution: Optional[tuple] = (1280, 720),
+                 lookup_table: Optional[list] = None
                  ) -> None:
         self.bridge = CvBridge()
         self.resolution = resolution
@@ -52,6 +55,8 @@ class Preproc:
 
         self.blur_filter_enabled = blur_filter_enabled
         self.blur_threshold = blur_threshold
+
+        self.lookup_table = np.array(lookup_table)
 
     def refine_seg(self, img, seg):
         sam_out = self.fastsam_model(img, device=self.device, retina_masks=False, iou=0.7, conf=0.5, imgsz=1024,
@@ -103,26 +108,34 @@ class Preproc:
         else:
             seg = cv2.resize(seg, self.resolution, interpolation=cv2.INTER_NEAREST)
 
-        seg_msg = self.bridge.cv2_to_imgmsg(cv2.convertScaleAbs(seg), "8UC1")
-        # TODO make the header proper
-        seg_msg.header.stamp = depth.header.stamp
-        seg_msg.header.frame_id = depth.header.frame_id
+        if self.lookup_table is not None:
+            seg = self.lookup_table[seg]
+
+        seg_msg = self.bridge.cv2_to_imgmsg(cv2.convertScaleAbs(seg * 5), "8UC1")
         self.seg_pub.publish(seg_msg)
         self.depth_pub.publish(depth)
 
 
 def main():
     rospy.init_node("preproc")
-    # packages = rospkg.RosPack().list_packages()
+    rospy.loginfo("node: preproc")
+
     rospkg_path = rospkg.RosPack().get_path('seg_preproc')
+
+    with open(rospkg_path + '/resources/dms.json', 'r') as file:
+        semantic_data = json.load(file)
+    with open(rospkg_path + '/resources/map.json', 'r') as file:
+        map_data = json.load(file)
+
     default_params = {
         '~resolution': (1280, 720),
         '~segformer_trt_file': rospkg_path + '/resources/trt_engine_8.6.1.trt',
         '~segformer_taxonomy': rospkg_path + '/resources/taxonomy.json',
         '~refinement_enabled': True,
         '~fastsam_pt_file': rospkg_path + '/resources/FastSAM-s.pt',
-        '~blur_filter_enabled': True,
-        '~blur_threshold': 20
+        '~blur_filter_enabled': False,
+        '~blur_threshold': 20,
+        '~lookup_table': concatenating_map(semantic_data, map_data)
     }
     params = {param.strip('~'): rospy.get_param(param, default) for param, default in default_params.items()}
 
