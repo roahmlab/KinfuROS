@@ -56,17 +56,17 @@ class Preproc:
         self.blur_filter_enabled = blur_filter_enabled
         self.blur_threshold = blur_threshold
 
-        self.lookup_table = np.array(lookup_table)
+        self.lookup_table = np.array(lookup_table) if lookup_table else None
 
     def refine_seg(self, img, seg):
         sam_out = self.fastsam_model(img, device=self.device, retina_masks=False, iou=0.7, conf=0.5, imgsz=1024,
                                      max_det=300)
         masks = sam_out[0].masks.data.cpu().detach().numpy().astype(bool)
 
-        cls = torch.zeros((576, 1024) + (56,), device=self.device)
-
         masks = torch.from_numpy(masks).to(self.device)
         seg = torch.from_numpy(seg).to(self.device)
+
+        cls = torch.nn.functional.one_hot(seg.long(), 56).permute(0, 1, 2).float().to(self.device)
 
         for i in range(masks.shape[0]):
             mask = masks[i]
