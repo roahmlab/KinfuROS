@@ -276,11 +276,11 @@ void KinFuImpl<T>::render(OutputArray image, const Matx44f& _cameraPose) const
     if((cameraPose.rotation() == pose.rotation() && cameraPose.translation() == pose.translation()) ||
        (cameraPose.rotation() == id.rotation()   && cameraPose.translation() == id.translation()))
     {
-        printf("That happened");
+        printf("That happened1");
         T points, normals, voxelClass;
         volume->raycast(cameraPose, params.intr, params.frameSize, points, normals, voxelClass);
-        renderPointsNormals(points, normals, voxelClass, image, params.lightPose);
-        // renderPointsNormals(pyrPoints[0], pyrNormals[0], pyrClasses[0], image, params.lightPose);
+        //renderPointsNormals(points, normals, voxelClass, image, params.lightPose);
+        renderPointsNormals(pyrPoints[0], pyrNormals[0], pyrClasses[0], image, params.lightPose);
     }
     else
     {   

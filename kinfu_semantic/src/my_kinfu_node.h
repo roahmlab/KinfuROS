@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <k4a/k4a.h>
 #include <math.h>
-#include"cnpy.h"
+
 
 using namespace std;
 
