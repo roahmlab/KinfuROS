@@ -111,7 +111,7 @@ class Preproc:
         if self.lookup_table is not None:
             seg = self.lookup_table[seg]
 
-        seg_msg = self.bridge.cv2_to_imgmsg(cv2.convertScaleAbs(seg * 5), "8UC1")
+        seg_msg = self.bridge.cv2_to_imgmsg(cv2.convertScaleAbs(seg), "8UC1")
         seg_msg.header = rgb.header
         self.seg_pub.publish(seg_msg)
         self.depth_pub.publish(depth)

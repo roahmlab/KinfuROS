@@ -1,5 +1,10 @@
 {
-  "1": ["none", "hide"],
-  "2": ["wood"],
-  "3": ["brick", "stone", "engineeredstone"]
+	"0": ["brick", "engineeredstone", "stone", "polishedstone"],
+	"1": ["cardboard", "paper", "wallpaper"],
+	"2": ["carpet", "fabric"],
+	"3": ["ice"],
+	"4": ["concrete", "asphalt"],
+	"5": ["paint", "clearplastic", "plastic", "rubber"],
+	"6": ["foliage", "glass", "soil"],
+	"7": ["cork", "wicker", "wood", "treewood"]
 }
