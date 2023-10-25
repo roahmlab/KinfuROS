@@ -2,7 +2,7 @@
 
 # Fast Segment Anything
 
-[[`📕Paper`](https://arxiv.org/pdf/2306.12156.pdf)] [[`🤗HuggingFace Demo`](https://huggingface.co/spaces/An-619/FastSAM)] [[`Colab demo`](https://colab.research.google.com/drive/1oX14f6IneGGw612WgVlAiy91UHwFAvr9?usp=sharing)] [[`Replicate demo & API`](https://replicate.com/casia-iva-lab/fastsam)] [[`Model Zoo`](#model-checkpoints)] [[`BibTeX`](#citing-fastsam)]
+[[`📕Paper`](https://arxiv.org/pdf/2306.12156.pdf)] [[`🤗HuggingFace Demo`](https://huggingface.co/spaces/An-619/FastSAM)] [[`Colab demo`](https://colab.research.google.com/drive/1oX14f6IneGGw612WgVlAiy91UHwFAvr9?usp=sharing)] [[`Replicate demo & API`](https://replicate.com/casia-iva-lab/fastsam)] [[`OpenXLab Demo`](https://openxlab.org.cn/apps/detail/zxair/FastSAM)] [[`Model Zoo`](#model-checkpoints)] [[`BibTeX`](#citing-fastsam)]
 
 ![FastSAM Speed](assets/head_fig.png)
 
@@ -12,6 +12,8 @@ the SAM method at **50× higher run-time speed**.
 ![FastSAM design](assets/Overview.png)
 
 **🍇 Updates**
+- **`2023/09/11`** Release  [Training and Validation Code](https://github.com/CASIA-IVA-Lab/FastSAM/releases).
+- **`2023/08/17`** Release  [OpenXLab Demo](https://openxlab.org.cn/apps/detail/zxair/FastSAM). Thanks to OpenXLab Team for help.
 - **`2023/07/06`** Added to [Ultralytics (YOLOv8) Model Hub](https://docs.ultralytics.com/models/fast-sam/). Thanks to [Ultralytics](https://github.com/ultralytics/ultralytics) for help 🌹.
 - **`2023/06/29`** Support [text mode](https://huggingface.co/spaces/An-619/FastSAM) in HuggingFace Space. Thanks a lot to [gaoxinge](https://github.com/gaoxinge) for help 🌹.
 - **`2023/06/29`** Release [FastSAM_Awesome_TensorRT](https://github.com/ChuRuaNh0/FastSam_Awsome_TensorRT). Thanks a lot to [ChuRuaNh0](https://github.com/ChuRuaNh0) for providing the TensorRT model of FastSAM 🌹.
@@ -48,6 +50,7 @@ pip install git+https://github.com/openai/CLIP.git
 ```
 
 ## <a name="GettingStarted"></a> Getting Started
+
 
 First download a [model checkpoint](#model-checkpoints).
 
@@ -97,14 +100,19 @@ ann = prompt_process.text_prompt(text='a photo of a dog')
 # point_label default [0] [1,0] 0:background, 1:foreground
 ann = prompt_process.point_prompt(points=[[620, 360]], pointlabel=[1])
 
-prompt_process.plot(annotations=ann,output='./output/',)
+prompt_process.plot(annotations=ann,output_path='./output/dog.jpg',)
 ```
 
 You are also welcomed to try our Colab demo: [FastSAM_example.ipynb](https://colab.research.google.com/drive/1oX14f6IneGGw612WgVlAiy91UHwFAvr9?usp=sharing).
 
+
+
 ## Different Inference Options
 
 We provide various options for different purposes, details are in [MORE_USAGES.md](MORE_USAGES.md).
+
+## Training or Validation
+Training from scratch or validation: [Training and Validation Code](https://github.com/CASIA-IVA-Lab/FastSAM/releases).
 
 ## Web demo
 

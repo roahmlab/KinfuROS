@@ -1,0 +1,16 @@
+clip
+cog==0.8.6
+cv_bridge==1.16.2
+gradio==3.48.0
+matplotlib==3.7.2
+message_filters==1.16.0
+numpy==1.24.4
+opencv_python==4.8.0.74
+Pillow==10.1.0
+pycuda==2022.2.2
+rospkg==1.5.0
+rospy==1.16.0
+sensor_msgs==1.13.1
+tensorrt==8.6.1
+torch==2.0.1
+ultralytics==8.0.120
