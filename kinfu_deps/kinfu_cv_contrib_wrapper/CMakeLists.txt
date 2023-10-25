@@ -112,7 +112,7 @@ catkin_package(
     ${VTK_INCLUDE_DIRS}
   LIBRARIES
     # ${OpenCV_LIBRARIES}
-    opencv_rgbdroahm opencv_viz cnpy
+    opencv_rgbdroahm opencv_viz
     ${VTK_LIBRARIES})
 
 
