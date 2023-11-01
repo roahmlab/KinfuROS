@@ -103,9 +103,9 @@ public:
     const Affine3f getPose() const CV_OVERRIDE;
 
 
-    bool update(InputArray depth, const Semantic& _semantic) override;
+    bool update(InputArray depth, const Semantic& _semantic, const cv::Matx44f& externalCameraPose) override;
 
-    bool updateT(const T& depth, const Semantic& _semantic);
+    bool updateT(const T& depth, const Semantic& _semantic, const cv::Matx44f& externalCameraPose);
 
 private:
     Params params;
@@ -161,7 +161,7 @@ const Affine3f KinFuImpl<T>::getPose() const
 
 
 template<>
-bool KinFuImpl<Mat>::update(InputArray _depth, const Semantic& _semantic)
+bool KinFuImpl<Mat>::update(InputArray _depth, const Semantic& _semantic, const Matx44f& externalCameraPose)
 {
 
     CV_Assert(!_depth.empty() && _depth.size() == params.frameSize);
@@ -171,17 +171,17 @@ bool KinFuImpl<Mat>::update(InputArray _depth, const Semantic& _semantic)
     if(_depth.isUMat())
     {
         _depth.copyTo(depth);
-        return updateT(depth, _semantic);
+        return updateT(depth, _semantic, externalCameraPose);
     }
     else
     {
-        return updateT(_depth.getMat(), _semantic);
+        return updateT(_depth.getMat(), _semantic, externalCameraPose);
     }
 }
 
 
 template<>
-bool KinFuImpl<UMat>::update(InputArray _depth, const Semantic& _semantic)
+bool KinFuImpl<UMat>::update(InputArray _depth, const Semantic& _semantic, const Matx44f& externalCameraPose)
 {
 //    printf("_depth.size(): (%d, %d) params.frameSize: (%d, %d)\n",
 //           _depth.size().width, _depth.size().height,
@@ -192,17 +192,17 @@ bool KinFuImpl<UMat>::update(InputArray _depth, const Semantic& _semantic)
     if(!_depth.isUMat())
     {
         _depth.copyTo(depth);
-        return updateT(depth, _semantic);
+        return updateT(depth, _semantic, externalCameraPose);
     }
     else
     {
-        return updateT(_depth.getUMat(), _semantic);
+        return updateT(_depth.getUMat(), _semantic, externalCameraPose);
     }
 }
 
 
 template< typename T >
-bool KinFuImpl<T>::updateT(const T& _depth, const Semantic& _semantic)
+bool KinFuImpl<T>::updateT(const T& _depth, const Semantic& _semantic, const Matx44f& externalCameraPose)
 {
     CV_TRACE_FUNCTION();
 
@@ -236,13 +236,18 @@ bool KinFuImpl<T>::updateT(const T& _depth, const Semantic& _semantic)
     }
     else
     {
-        Affine3f affine;
-        bool success = icp->estimateTransform(affine, pyrPoints, pyrNormals, newPoints, newNormals);
-//      TODO: rtabSLAM
-        if(!success)
-            return false;
+        Matx33f rotation(
+                externalCameraPose(0, 0), externalCameraPose(0, 1), externalCameraPose(0, 2),
+                externalCameraPose(1, 0), externalCameraPose(1, 1), externalCameraPose(1, 2),
+                externalCameraPose(2, 0), externalCameraPose(2, 1), externalCameraPose(2, 2)
+        );
 
-        pose = pose * affine;
+        Vec3f translation(externalCameraPose(0, 3), externalCameraPose(1, 3), externalCameraPose(2, 3));
+
+        Affine3f newPose(rotation, translation);
+        Affine3f affine = pose.inv() * newPose;
+        
+        pose = newPose;
         float rnorm = (float)cv::norm(affine.rvec());
         float tnorm = (float)cv::norm(affine.translation());
 
@@ -250,6 +255,7 @@ bool KinFuImpl<T>::updateT(const T& _depth, const Semantic& _semantic)
         // We do not integrate volume if camera does not move
         if((rnorm + tnorm)/2 >= params.tsdf_min_camera_movement)
         {
+            printf("camera does not move\n");
             // use depth instead of distance
             volume->integrate(depth, _semantic, params.depthFactor, pose, params.intr);
         }

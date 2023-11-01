@@ -33,6 +33,7 @@ cv::Matx44f poseToMatrix(const geometry_msgs::Point& position, const geometry_ms
 //                      0.000000 0.000000 0.000000 1.000000
 
     Eigen::Quaterniond quat(orientation.w, orientation.x, orientation.y, orientation.z);
+
     Eigen::Translation3d trans(position.x, position.y, position.z);
 
     Eigen::Matrix4f transEigen = (trans * quat).matrix().cast<float>();
@@ -122,7 +123,7 @@ public:
 
         if (!depth.empty() && !semantic.empty()) {
             // Update KinectFusion using kf_ object
-            if (!kf->update(depth, semantic)) {
+            if (!kf->update(depth, semantic, cameraPose)) {
                 printf("Reset KinectFusion\n");
                 kf->reset();
             }

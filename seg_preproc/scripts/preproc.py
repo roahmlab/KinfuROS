@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/home/hao/catkin_ws/src/KinfuROS/seg_preproc/venv/bin/python
+# #!/usr/bin/env python
 import sys
 import os
 from typing import Optional
@@ -44,8 +45,8 @@ class Preproc:
         self.segformer_trt = SegFormerTRT(segformer_trt_file, segformer_taxonomy)
         self.fastsam_model = FastSAM(fastsam_pt_file) if refinement_enabled else None
 
-        self.rgb_sub = message_filters.Subscriber('/rgb/image_raw', Image)
-        self.depth_sub = message_filters.Subscriber('/depth_to_rgb/image_raw', Image)
+        self.rgb_sub = message_filters.Subscriber('/k4a/rgb/image_raw', Image)
+        self.depth_sub = message_filters.Subscriber('/k4a/depth_to_rgb/image_raw', Image)
         self.ts = message_filters.ApproximateTimeSynchronizer([self.rgb_sub, self.depth_sub], 3000, 0.1,
                                                               allow_headerless=True)
         self.ts.registerCallback(self.preproc_callback)
@@ -136,8 +137,8 @@ def main():
         '~fastsam_pt_file': rospkg_path + '/resources/FastSAM-s.pt',
         '~blur_filter_enabled': False,
         '~blur_threshold': 20,
-        '~lookup_table': concatenating_map(semantic_data, map_data)
-        # '~lookup_table': None
+        # '~lookup_table': concatenating_map(semantic_data, map_data)
+        '~lookup_table': None
     }
     params = {param.strip('~'): rospy.get_param(param, default) for param, default in default_params.items()}
 
