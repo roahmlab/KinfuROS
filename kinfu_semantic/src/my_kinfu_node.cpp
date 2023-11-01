@@ -22,7 +22,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 
-cv::Matx44f poseToMatrix(const geometry_msgs::Point& position, const geometry_msgs::Quaternion& orientation)
+cv::Affine3f poseToMatrix(const geometry_msgs::Point& position, const geometry_msgs::Quaternion& orientation)
 {
 //    TODO: potential accuracy issue
 //    Position: x: -0.146726, y: 0.215163, z: 0.076227
@@ -36,22 +36,36 @@ cv::Matx44f poseToMatrix(const geometry_msgs::Point& position, const geometry_ms
 
     Eigen::Translation3d trans(position.x, position.y, position.z);
 
-    Eigen::Matrix4f transEigen = (trans * quat).matrix().cast<float>();
+    Eigen::Matrix4f mat = (trans * quat).matrix().cast<float>();
 
-    cv::Matx44f transOpenCV;
-    cv::eigen2cv(transEigen, transOpenCV);
+    cv::Matx33f rotation(
+            mat(0, 0), mat(0, 1), mat(0, 2),
+            mat(1, 0), mat(1, 1), mat(1, 2),
+            mat(2, 0), mat(2, 1), mat(2, 2)
+    );
 
-    return transOpenCV;
+    cv::Vec3f translation(mat(0, 3), mat(1, 3), mat(2, 3));
+
+    cv::Affine3f affine(rotation, translation);
+
+    return affine;
 }
 
-void printMat(const cv::Matx44f& mat)
+void printMat(const cv::Affine3f& mat)
 {
-    for(int i = 0; i < 4; i++) {
-        for(int j = 0; j < 4; j++)
-            printf("%f ", mat(i, j));
+    // Print rotation matrix part (3x3)
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            printf("%f ", mat.rotation()(i, j));
+        }
+        // Print translation part for the current row
+        printf("%f ", mat.translation()[i]);
         printf("\n");
     }
+    // Print the last row for a homogeneous matrix
+    printf("0.000000 0.000000 0.000000 1.000000\n");
 }
+
 
 class KinectFusionNode {
 private:
@@ -111,8 +125,16 @@ public:
 
         geometry_msgs::Point p = pose_msg->pose.pose.position;
         geometry_msgs::Quaternion q = pose_msg->pose.pose.orientation;
-        cv::Matx44f cameraPose = poseToMatrix(p, q);
-        printMat(cameraPose);
+        cv::Affine3f cameraPose = poseToMatrix(p, q);
+
+        cv::Affine3f trans_ck(cv::Matx33f(0, 0, -1, // TODO
+                                       1, 0, 0,
+                                       0, 1, 0));
+
+        cv::Affine3f kinfuPose = trans_ck.inv() * cameraPose;
+
+        printMat(kinfuPose);
+
 
         ROS_INFO("Position: x: %f, y: %f, z: %f", p.x, p.y, p.z);
         ROS_INFO("Orientation: x: %f, y: %f, z: %f, w: %f", q.x, q.y, q.z, q.w);
@@ -123,7 +145,7 @@ public:
 
         if (!depth.empty() && !semantic.empty()) {
             // Update KinectFusion using kf_ object
-            if (!kf->update(depth, semantic, cameraPose)) {
+            if (!kf->update(depth, semantic, kinfuPose)) {
                 printf("Reset KinectFusion\n");
                 kf->reset();
             }

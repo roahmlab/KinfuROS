@@ -193,7 +193,7 @@ g that I need to come into la
     @param depth one-channel image which size and depth scale is described in algorithm's parameters
     @return true if succeded to align new frame with current scene, false if opposite
     */
-    CV_WRAP virtual bool update(InputArray depth, const Semantic& _semantic, const cv::Matx44f& externalCameraPose) = 0;
+    CV_WRAP virtual bool update(InputArray depth, const Semantic& _semantic, const Affine3f& externalCameraPose) = 0;
 };
 
 //! @}
