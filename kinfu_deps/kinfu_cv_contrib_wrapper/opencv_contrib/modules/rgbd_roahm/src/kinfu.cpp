@@ -163,6 +163,7 @@ const Affine3f KinFuImpl<T>::getPose() const
 template<>
 bool KinFuImpl<Mat>::update(InputArray _depth, const Semantic& _semantic)
 {
+
     CV_Assert(!_depth.empty() && _depth.size() == params.frameSize);
 
     Mat depth;
@@ -182,13 +183,16 @@ bool KinFuImpl<Mat>::update(InputArray _depth, const Semantic& _semantic)
 template<>
 bool KinFuImpl<UMat>::update(InputArray _depth, const Semantic& _semantic)
 {
-    CV_Assert(!_depth.empty() && _depth.size() == params.frameSize);
+//    printf("_depth.size(): (%d, %d) params.frameSize: (%d, %d)\n",
+//           _depth.size().width, _depth.size().height,
+//           params.frameSize.width, params.frameSize.height);
+    CV_Assert(!_depth.empty() && _depth.size() == params.frameSize); // TODO
 
     UMat depth;
     if(!_depth.isUMat())
     {
         _depth.copyTo(depth);
-        return updateT(depth, _semantic); 
+        return updateT(depth, _semantic);
     }
     else
     {
@@ -219,7 +223,7 @@ bool KinFuImpl<T>::updateT(const T& _depth, const Semantic& _semantic)
                        params.depthFactor,
                        params.bilateral_sigma_depth,
                        params.bilateral_sigma_spatial,
-                       params.bilateral_kernel_size); 
+                       params.bilateral_kernel_size);
 
     if(frameCounter == 0)
     {
@@ -234,6 +238,7 @@ bool KinFuImpl<T>::updateT(const T& _depth, const Semantic& _semantic)
     {
         Affine3f affine;
         bool success = icp->estimateTransform(affine, pyrPoints, pyrNormals, newPoints, newNormals);
+//      TODO: rtabSLAM
         if(!success)
             return false;
 
@@ -244,18 +249,18 @@ bool KinFuImpl<T>::updateT(const T& _depth, const Semantic& _semantic)
 
         // We do not integrate volume if camera does not move
         if((rnorm + tnorm)/2 >= params.tsdf_min_camera_movement)
-        { 
+        {
             // use depth instead of distance
             volume->integrate(depth, _semantic, params.depthFactor, pose, params.intr);
         }
-        
+
         T& points  = pyrPoints [0];
         T& normals = pyrNormals[0];
         T& VoxMat = pyrClasses[0];
         volume->raycast(pose, params.intr, params.frameSize, points, normals, VoxMat);
 
         // build a pyramid of points and normals
-        buildPyramidPointsNormals(points, normals, pyrPoints, pyrNormals, 
+        buildPyramidPointsNormals(points, normals, pyrPoints, pyrNormals,
                                   params.pyramidLevels);
     }
 
