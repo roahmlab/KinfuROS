@@ -86,6 +86,7 @@ private:
     message_filters::Synchronizer<sync_policy> sync;
 
 public:
+<<<<<<< HEAD
 
     KinectFusionNode() : nh_("~"),
                          depth_sub_(nh_, "/preproc/depth", 1),
@@ -98,6 +99,14 @@ public:
         pub = it.advertise("kinect_fusion_visualization", 1);
         sync.registerCallback(boost::bind(&KinectFusionNode::callback, this, _1, _2, _3));
 //        sync.registerCallback(boost::bind(&KinectFusionNode::callback, this, _1, _2));
+=======
+   
+    KinectFusionNode() : nh_("~"), depth_sub_(nh_, "/preproc/depth", 1), semantic_sub_(nh_, "/preproc/segmentation", 1),
+    sync(sync_policy(30), depth_sub_, semantic_sub_) {
+        image_transport::ImageTransport it(nh_);
+        pub = it.advertise("kinect_fusion_visualization", 1);
+        sync.registerCallback(boost::bind(&KinectFusionNode::callback, this, _1, _2));
+>>>>>>> 85b807c (tidy up)
 
         int width = 1280;
         int height = 720;
@@ -160,6 +169,10 @@ public:
             cv::Mat tsdfRenderMat;
             tsdfRender.copyTo(tsdfRenderMat);
 
+<<<<<<< HEAD
+=======
+            //create the sensor message
+>>>>>>> 85b807c (tidy up)
             sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "rgba8", tsdfRenderMat).toImageMsg();
             pub.publish(msg);
         }

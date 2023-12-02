@@ -1,9 +1,3 @@
-// This file is part of OpenCV project.
-// It is subject to the license terms in the LICENSE file found in the top-level directory
-// of this distribution and at http://opencv.org/license.html
-
-// This code is also subject to the license terms in the LICENSE_KinectFusion.md file found in this module's directory
-
 #include "precomp.hpp"
 #include "fast_icp.hpp"
 #include "tsdf.hpp"
@@ -16,7 +10,7 @@ Ptr<Params> Params::defaultParams()
 {
     Params p; 
 
-    p.frameSize = Size(640, 480);
+    p.frameSize = Size(1280, 720);
 
     float fx, fy, cx, cy;
     fx = fy = 525.f;
@@ -41,27 +35,23 @@ Ptr<Params> Params::defaultParams()
     p.icpIterations = {10, 5, 4};
     p.pyramidLevels = (int)p.icpIterations.size();
 
-    p.tsdf_min_camera_movement = 0.f; //meters, disabled
+    p.tsdf_min_camera_movement = 0.001f; //meters, disabled
 
     p.volumeDims = Vec3i::all(512); //number of voxels
 
-    float volSize = 3.f;
+    float volSize = 4.f;
     p.voxelSize = volSize/512.f; //meters
 
     // default pose of volume cube
-    p.volumePose = Affine3f().translate(Vec3f(-volSize/2.f, -volSize/2.f, 0.5f));
+    // p.volumePose = Affine3f().translate(Vec3f(-volSize/2.f, -volSize/2.f, 0.5f)); //-----------> position of the cube
+    p.volumePose = Affine3f().translate(Vec3f(0.f, 0.f, 0.f));
+
     p.tsdf_trunc_dist = 0.04f; //meters;
     p.tsdf_max_weight = 64;   //frames
 
     p.raycast_step_factor = 0.25f;  //in voxel sizes
-    // gradient delta factor is fixed at 1.0f and is not used
-    //p.gradient_delta_factor = 0.5f; //in voxel sizes
 
-    //p.lightPose = p.volume_pose.translation()/4; //meters
     p.lightPose = Vec3f::all(0.f); //meters
-
-    // depth truncation is not used by default
-    //p.icp_truncate_depth_dist = 0.f;        //meters, disabled
 
     return makePtr<Params>(p);
 }
@@ -119,7 +109,6 @@ private:
     std::vector<T> pyrNormals;
     std::vector<T> pyrClasses;
 
-    //VoxelClass VoxMat;
 };
 
 
@@ -272,7 +261,6 @@ void KinFuImpl<T>::render(OutputArray image, const Matx44f& _cameraPose) const
 
     Affine3f cameraPose(_cameraPose);
  
-    int label = 3; //volume->maxIndexMat;
     const Affine3f id = Affine3f::Identity();
     if((cameraPose.rotation() == pose.rotation() && cameraPose.translation() == pose.translation()) ||
        (cameraPose.rotation() == id.rotation()   && cameraPose.translation() == id.translation()))
@@ -280,7 +268,6 @@ void KinFuImpl<T>::render(OutputArray image, const Matx44f& _cameraPose) const
         printf("That happened1");
         T points, normals, voxelClass;
         volume->raycast(cameraPose, params.intr, params.frameSize, points, normals, voxelClass);
-        //renderPointsNormals(points, normals, voxelClass, image, params.lightPose);
         renderPointsNormals(pyrPoints[0], pyrNormals[0], pyrClasses[0], image, params.lightPose);
     }
     else
@@ -314,7 +301,6 @@ void KinFuImpl<T>::getNormals(InputArray points, OutputArray normals) const
     volume->fetchNormals(points, normals);
 }
 
-// importing class
 
 #ifdef OPENCV_ENABLE_NONFREE
 
