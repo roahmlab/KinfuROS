@@ -36,14 +36,8 @@ public:
    
     KinectFusionNode() : nh_("~"), depth_sub_(nh_, "/preproc/depth", 1), semantic_sub_(nh_, "/preproc/segmentation", 1),
     sync(sync_policy(30), depth_sub_, semantic_sub_) {
-        //depth_sub_.subscribe(nh_, "/preproc/depth", 1);
-        //semantic_sub_.subscribe(nh_, "/preproc/segmentation", 1);
-        // ros::NodeHandle nh_;
         image_transport::ImageTransport it(nh_);
         pub = it.advertise("kinect_fusion_visualization", 1);
-        // visualization_pub_ = nh_.advertise<sensor_msgs::ImagePtr>("kinect_fusion_visualization", 1); 
-        //typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_policy;
-        //message_filters::Synchronizer<sync_policy> sync(sync_policy(30), depth_sub_, semantic_sub_);
         sync.registerCallback(boost::bind(&KinectFusionNode::callback, this, _1, _2));
 
         int width = 1280;
@@ -87,16 +81,7 @@ public:
             cv::Mat tsdfRenderMat;
             tsdfRender.copyTo(tsdfRenderMat);
 
-
-            // printf("%d\n", tsdfRenderMat.channels());
-            // cv::Size s = tsdfRender.size();
-            // int rows = s.height;
-            // int cols = s.width;
-            // printf("%d", rows);
-            // printf("%d", cols);
-
-            // Create the sensor_msgs::Image message
-            // sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", tsdfRenderMat).toImageMsg();
+            //create the sensor message
             sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "rgba8", tsdfRenderMat).toImageMsg();
             pub.publish(msg);
         }
