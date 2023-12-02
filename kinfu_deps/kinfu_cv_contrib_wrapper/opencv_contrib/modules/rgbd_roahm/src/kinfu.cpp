@@ -43,8 +43,8 @@ Ptr<Params> Params::defaultParams()
     p.voxelSize = volSize/512.f; //meters
 
     // default pose of volume cube
-    // p.volumePose = Affine3f().translate(Vec3f(-volSize/2.f, -volSize/2.f, 0.5f)); //-----------> position of the cube
-    p.volumePose = Affine3f().translate(Vec3f(0.f, 0.f, 0.f));
+     p.volumePose = Affine3f().translate(Vec3f(-volSize/2.f, -volSize/2.f, 0.5f)); //-----------> position of the cube
+    //p.volumePose = Affine3f().translate(Vec3f(0.f, 0.f, 0.f));
 
     p.tsdf_trunc_dist = 0.04f; //meters;
     p.tsdf_max_weight = 64;   //frames
