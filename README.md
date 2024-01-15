@@ -44,7 +44,7 @@ source devel/setup.bash
    ```
    https://developer.nvidia.com/nvidia-tensorrt-8x-download 
    ```
-## Usage
+## Usage (for pre-recorded ROS bags)
 Before running the package, make sure you build the package successfully and source the workspace.
 1. Run the preproc package (
 ```
@@ -57,4 +57,19 @@ roslaunch kinfu_semantic kinect_fusion_rviz.launch
 3. Run the ROS bag containing pre-recorded
 ```
 rosbag play {$bagname}.bag
+```
+## Useage (for real-time camera capture)
+Before running the package, make sure you build the package successfully and source the workspace. Make sure to also install the Microsoft Azure Camera driver on your computer and is able to connect.
+1. Run the preproc package (
+```
+python3 ~/catkin_ws/src/seg_preproc/scripts/preproc.py
+```
+2. Run the Azure Kinect driver to connect camera
+```
+roslaunch azure_kinect_ros_driver slam_rtabmap.launch
+```
+3. Launch the package using the following code.
+```
+roslaunch kinfu_semantic kinect_fusion_rviz.launch
+```
 
